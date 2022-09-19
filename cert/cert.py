@@ -1,4 +1,5 @@
 import ipaddress
+import attrs.converters
 from attrs.converters import default_if_none
 from typing import Callable, Iterable
 from attrs import frozen, field
@@ -58,7 +59,6 @@ def _san_converter(
 class CertBuilderArgs:
     subject: x509.Name
     issuer: x509.Name
-    # public_key: rsa.RSAPublicKey
     public_key: CERTIFICATE_PUBLIC_KEY_TYPES
     not_valid_before: datetime = field(
         default=None, converter=default_if_none(factory=datetime.now)  # type: ignore
@@ -69,7 +69,7 @@ class CertBuilderArgs:
     )
 
     subject_alternative_name: x509.SubjectAlternativeName | None = field(
-        default=None, converter=_san_converter
+        default=None, converter=attrs.converters.optional(_san_converter)
     )
     extensions: tuple[x509.Extension, ...] = field(default=tuple(), converter=tuple)
 

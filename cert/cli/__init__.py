@@ -45,13 +45,11 @@ def mkpriv(file: typing.BinaryIO):
     default=datetime.now() + timedelta(days=40),
 )
 # @click.option("--exp", type=click.DateTime)
-@click.argument("sans", required=True, nargs=-1, type=X509_GENERAL_NAME)
 def mkca(
     privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
     out: typing.BinaryIO,
     commonname: str,
     # expiration: datetime | None,
-    sans: list[x509.GeneralName],
 ):
     # TODO: restrictions
     cn = simple_common_name(commonname)
@@ -62,7 +60,6 @@ def mkca(
         issuer=cn,
         public_key=pubkey,
         # not_valid_after=expiration,
-        subject_alternative_name=x509.SubjectAlternativeName(sans),
     )
     cacert = builder.make_and_sign(privkey)
     out.write(serialize_public_cert(cacert))
@@ -96,7 +93,7 @@ def mkca(
 def mkcert(
     privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
     cakey: CERTIFICATE_PRIVATE_KEY_TYPES,
-    leafcert: x509.Certificate,
+    cacert: x509.Certificate,
     out: typing.BinaryIO,
     commonname: str,
     # expiration: datetime | None,
@@ -107,7 +104,7 @@ def mkcert(
     pubkey = privkey.public_key()
     builder = CertBuilderArgs(
         subject=cn,
-        issuer=leafcert.subject,
+        issuer=cacert.subject,
         public_key=pubkey,
         # not_valid_after=expiration,
         subject_alternative_name=x509.SubjectAlternativeName(sans),
@@ -136,5 +133,8 @@ def serve(
 ):
     ctx = make_context(Path(cert), Path(privkey))
     server = make_server(ctx)
-    print(f"Serving on {server.server_port}")
+    port = server.server_port
+    print(f"Serving on:")
+    print(f"https://127.0.0.1:{port}/")
+    print(f"https://localhost:{port}/")
     server.serve_forever()
