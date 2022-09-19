@@ -1,0 +1,21 @@
+[project]
+name = "cert"
+version = "0.0.1"
+description = "create self-signed certs and CAs with proper extensions. probably insecure tho."
+
+dependencies = [
+    "cryptography",
+    "attrs", "cattrs",
+    "click",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ipython", "pytest", "black", "isort", "pylama"
+]
+
+[project.scripts]
+cert = "cert:cli.cli"
+
+[tool.setuptools]
+packages = ["cert"]
