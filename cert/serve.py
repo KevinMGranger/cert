@@ -5,7 +5,9 @@ from ssl import SSLContext, PROTOCOL_TLS_SERVER
 
 class _ResponseHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        self.send_response_only(200, "Secure hello!")
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Secure hello!")
 
 
 def make_server(ssl_context: SSLContext, port: int = 0):
