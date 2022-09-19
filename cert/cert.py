@@ -1,8 +1,8 @@
 import ipaddress
 from attrs.converters import default_if_none
-from typing import Iterable
+from typing import Callable, Iterable
 from attrs import frozen, field
-from functools import partial
+from functools import partial, partialmethod
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography import x509
@@ -11,26 +11,38 @@ from cryptography.hazmat.primitives import hashes
 from datetime import datetime, timedelta
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
+    CERTIFICATE_PRIVATE_KEY_TYPES,
     CERTIFICATE_PUBLIC_KEY_TYPES,
 )
 
-make_private_key = partial(
-    rsa.generate_private_key,
+
+def make_private_key(
+    # todo: callable protocol for positional and kwargs, although is that really necessary?
+    keygenfunc: Callable[
+        [int, int], CERTIFICATE_PRIVATE_KEY_TYPES
+    ] = rsa.generate_private_key,
+    /,
+    *,
     public_exponent=65537,
     key_size=4096,
-)
+):
+    return keygenfunc(public_exponent, key_size)
 
 
-serialize_private = partial(
-    rsa.RSAPrivateKey.private_bytes,
-    encoding=serialization.Encoding.PEM,
-    format=serialization.PrivateFormat.TraditionalOpenSSL,
-)
+def serialize_private(
+    privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
+    *,
+    encryption_algorithm: serialization.KeySerializationEncryption = serialization.NoEncryption(),
+):
+    return privkey.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=encryption_algorithm,
+    )
 
-serialize_public_cert = partial(
-    x509.Certificate.public_bytes,
-    encoding=serialization.Encoding.PEM,
-)
+
+def serialize_public_cert(cert: x509.Certificate):
+    return cert.public_bytes(serialization.Encoding.PEM)
 
 
 def _san_converter(

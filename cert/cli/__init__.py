@@ -12,6 +12,7 @@ from cert.cert import (
     serialize_public_cert,
 )
 from cert.serve import make_server, make_context
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from .types import X509_GENERAL_NAME, X509Certificate, X509PrivateKey
 from cryptography.hazmat.primitives.asymmetric.types import (
@@ -29,12 +30,8 @@ def cli():
 @click.argument("file", type=click.File(mode="xb", lazy=False))
 def mkpriv(file: typing.BinaryIO):
     key = make_private_key()
-    file.write(
-        serialize_private(
-            key,
-            encryption_algorithm=serialization.NoEncryption,  # type: ignore # nonsense
-        )
-    )
+    bytes_ = serialize_private(key)
+    file.write(bytes_)
 
 
 @cli.command(help="create a CA cert")
