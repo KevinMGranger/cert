@@ -95,13 +95,13 @@ class CertBuilderArgs:
 
         return builder
 
-    def make_and_sign(
-        self,
-        private_key: CERTIFICATE_PRIVATE_KEY_TYPES,
-        algorithm: hashes.HashAlgorithm = hashes.SHA256(),
-    ) -> x509.Certificate:
-        builder = self.make_builder()
-        return builder.sign(private_key, algorithm)
+
+def sign_builder(
+    builder: x509.CertificateBuilder,
+    private_key: CERTIFICATE_PRIVATE_KEY_TYPES,
+    algorithm: hashes.HashAlgorithm = hashes.SHA256(),
+):
+    return builder.sign(private_key, algorithm)
 
 
 def parse_name(name: str) -> x509.IPAddress | x509.DNSName:
@@ -112,5 +112,14 @@ def parse_name(name: str) -> x509.IPAddress | x509.DNSName:
         return x509.DNSName(name)
 
 
+ORG = x509.NameAttribute(NameOID.ORGANIZATION_NAME, "cert python cli")
+
+
 def simple_common_name(name: str) -> x509.Name:
-    return x509.Name((x509.NameAttribute(NameOID.COMMON_NAME, name),))
+    return x509.Name(
+        (
+            ORG,
+            x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, name),
+            x509.NameAttribute(NameOID.COMMON_NAME, name),
+        )
+    )

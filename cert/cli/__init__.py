@@ -10,6 +10,7 @@ from cert.cert import (
     simple_common_name,
     CertBuilderArgs,
     serialize_public_cert,
+    sign_builder,
 )
 from cert.serve import make_server, make_context
 from cryptography.hazmat.primitives import serialization
@@ -18,6 +19,7 @@ from .types import X509_GENERAL_NAME, X509Certificate, X509PrivateKey
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
 )
+from cryptography.x509.oid import NameOID
 
 
 @click.group()
@@ -55,13 +57,21 @@ def mkca(
     cn = simple_common_name(commonname)
     # TODO: this is wrong, and this is why we rely on typing
     pubkey = privkey.public_key()
+
+    constraint_ext = x509.BasicConstraints(True, 2)
+    # TODO: figure out what these are and what chrome/macos needs
+    key_usage = x509.KeyUsage(True, True, True, True, True, True, True, False, False)
+
     builder = CertBuilderArgs(
         subject=cn,
         issuer=cn,
         public_key=pubkey,
-        # not_valid_after=expiration,
-    )
-    cacert = builder.make_and_sign(privkey)
+        extensions=(
+            x509.Extension(constraint_ext.oid, True, constraint_ext),
+            x509.Extension(key_usage.oid, True, key_usage),
+        ),
+    ).make_builder()
+    cacert = sign_builder(builder, privkey)
     out.write(serialize_public_cert(cacert))
 
 
@@ -101,15 +111,25 @@ def mkcert(
 ):
     # TODO: restrictions
     cn = simple_common_name(commonname)
+
+    constraint_ext = x509.BasicConstraints(True, 2)
+    # TODO: figure out what these are and what chrome/macos needs
+    key_usage = x509.KeyUsage(True, True, True, True, True, True, True, False, False)
+
     pubkey = privkey.public_key()
+
     builder = CertBuilderArgs(
         subject=cn,
         issuer=cacert.subject,
         public_key=pubkey,
         # not_valid_after=expiration,
         subject_alternative_name=x509.SubjectAlternativeName(sans),
-    )
-    leafcert = builder.make_and_sign(cakey)
+        extensions=(
+            x509.Extension(constraint_ext.oid, True, constraint_ext),
+            x509.Extension(key_usage.oid, True, key_usage),
+        ),
+    ).make_builder()
+    leafcert = sign_builder(builder, cakey)
     out.write(serialize_public_cert(leafcert))
 
 
