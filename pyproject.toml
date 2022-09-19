@@ -5,7 +5,7 @@ description = "create self-signed certs and CAs with proper extensions. probably
 
 dependencies = [
     "cryptography",
-    "attrs", "cattrs",
+    "attrs",
     "click",
 ]
 

@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from cryptography import x509
 from pathlib import Path
-from typing import cast
 import typing
 import click
 from cert.cert import (
@@ -13,13 +12,11 @@ from cert.cert import (
     sign_builder,
 )
 from cert.serve import make_server, make_context
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from .types import X509_GENERAL_NAME, X509Certificate, X509PrivateKey
+from .cli_types import X509_GENERAL_NAME, X509Certificate, X509PrivateKey
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
 )
-from cryptography.x509.oid import NameOID
 
 
 @click.group()

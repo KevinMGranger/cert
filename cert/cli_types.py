@@ -1,15 +1,9 @@
-from datetime import datetime, timedelta
 from cryptography import x509
-from pathlib import Path
-from typing import cast
-import typing
 import click
 from cert import cert
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
-    PRIVATE_KEY_TYPES,
 )
 
 

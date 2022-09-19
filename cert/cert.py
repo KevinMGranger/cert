@@ -3,7 +3,6 @@ import attrs.converters
 from attrs.converters import default_if_none
 from typing import Callable, Iterable
 from attrs import frozen, field
-from functools import partial, partialmethod
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography import x509
