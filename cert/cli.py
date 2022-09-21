@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+import threading
+import webbrowser
 from cryptography import x509
 from pathlib import Path
 import typing
@@ -144,14 +146,33 @@ def mkcert(
     type=click.Path(exists=True, readable=True),
     help="The leaf cert",
 )
+@click.option(
+    "--browser",
+    default=False,
+    is_flag=True,
+    show_default=True,
+    help="Launch a browser pointed at the running server",
+)
 def serve(
     privkey: str,
     cert: str,
+    browser: bool,
 ):
     ctx = make_context(Path(cert), Path(privkey))
     server = make_server(ctx)
     port = server.server_port
+
+    ip_url = f"https://127.0.0.1:{port}/"
+
     print(f"Serving on:")
-    print(f"https://127.0.0.1:{port}/")
+    print(ip_url)
     print(f"https://localhost:{port}/")
-    server.serve_forever()
+
+    with server:
+        thread = threading.Thread(target=server.serve_forever)
+        thread.start()
+
+        if browser:
+            webbrowser.open(ip_url)
+
+        thread.join()
