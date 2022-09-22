@@ -1,6 +1,7 @@
 from cryptography import x509
 import click
 from cert import cert
+from cert.ser import load_cert_private_key, InvalidPrivateKeyType
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
@@ -30,18 +31,16 @@ class X509Certificate(click.File):
 
 class X509PrivateKey(click.File):
     name = "x509 Private Key"
-    MSG = "Private key was not compatible with a certificate key type"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, mode="rb", lazy=False)
 
     def convert(self, value: str, param, ctx) -> CERTIFICATE_PRIVATE_KEY_TYPES:
         file = super().convert(value, param, ctx)
-        privkey = load_pem_private_key(file.read(), password=None)
-        if not isinstance(privkey, CERTIFICATE_PRIVATE_KEY_TYPES):  # type: ignore # works in 3.10, why does it complain?
+        try:
+            return load_cert_private_key(file.read())
+        except InvalidPrivateKeyType as e:
             if ctx is not None:
-                ctx.fail(self.MSG)
+                ctx.fail(e.message)
             else:
-                raise ValueError(self.MSG)
-        else:
-            return privkey  # type: ignore
+                raise

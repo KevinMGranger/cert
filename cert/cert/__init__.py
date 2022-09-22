@@ -29,20 +29,7 @@ def make_private_key(
     return keygenfunc(public_exponent, key_size)
 
 
-def serialize_private(
-    privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
-    *,
-    encryption_algorithm: serialization.KeySerializationEncryption = serialization.NoEncryption(),
-):
-    return privkey.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.TraditionalOpenSSL,
-        encryption_algorithm=encryption_algorithm,
-    )
 
-
-def serialize_public_cert(cert: x509.Certificate):
-    return cert.public_bytes(serialization.Encoding.PEM)
 
 
 def _san_converter(
