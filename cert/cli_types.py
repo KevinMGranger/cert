@@ -1,6 +1,7 @@
 from cryptography import x509
 import click
 from cert import cert
+from cert.util import parse_name as parse_x509_name
 from cert.ser import load_cert_private_key, InvalidPrivateKeyType
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric.types import (
@@ -12,7 +13,7 @@ class X509GeneralNameParamType(click.ParamType):
     name = "x509 General Name"
 
     def convert(self, value: str, param, ctx):
-        return cert.parse_name(value)
+        return parse_x509_name(value)
 
 
 X509_GENERAL_NAME = X509GeneralNameParamType()

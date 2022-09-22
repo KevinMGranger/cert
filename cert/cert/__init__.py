@@ -1,9 +1,8 @@
-import ipaddress
 import attrs.converters
 from attrs.converters import default_if_none
 from typing import Callable, Iterable
 from attrs import frozen, field
-from cryptography.hazmat.primitives import serialization
+from cert.utils import attrs_type_passthrough
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography import x509
 from cryptography.x509.oid import NameOID
@@ -29,17 +28,6 @@ def make_private_key(
     return keygenfunc(public_exponent, key_size)
 
 
-
-
-
-def _san_converter(
-    sans: Iterable[x509.GeneralName] | x509.SubjectAlternativeName,
-) -> x509.SubjectAlternativeName:
-    if isinstance(sans, x509.SubjectAlternativeName):
-        return sans
-    return x509.SubjectAlternativeName(sans)
-
-
 # TODO: url constraints for CA, supporting cross-signing and whatnot
 @frozen(kw_only=True)
 class CertBuilderArgs:
@@ -55,7 +43,12 @@ class CertBuilderArgs:
     )
 
     subject_alternative_name: x509.SubjectAlternativeName | None = field(
-        default=None, converter=attrs.converters.optional(_san_converter)
+        default=None,
+        converter=attrs.converters.optional(
+            attrs_type_passthrough(
+                x509.SubjectAlternativeName, x509.SubjectAlternativeName
+            )
+        ),
     )
     extensions: tuple[x509.Extension, ...] = field(default=tuple(), converter=tuple)
 
@@ -88,14 +81,6 @@ def sign_builder(
     algorithm: hashes.HashAlgorithm = hashes.SHA256(),
 ):
     return builder.sign(private_key, algorithm)
-
-
-def parse_name(name: str) -> x509.IPAddress | x509.DNSName:
-    try:
-        ipaddr = ipaddress.ip_address(name)
-        return x509.IPAddress(ipaddr)
-    except ValueError:
-        return x509.DNSName(name)
 
 
 ORG = x509.NameAttribute(NameOID.ORGANIZATION_NAME, "cert python cli")

@@ -5,16 +5,14 @@ from cryptography import x509
 from pathlib import Path
 import typing
 import click
+from cert.cert.ser import serialize_private, serialize_public_cert
 from cert.cert import (
     make_private_key,
-    serialize_private,
     simple_common_name,
     CertBuilderArgs,
-    serialize_public_cert,
     sign_builder,
 )
 from cert.serve import make_server, make_context
-from cryptography.hazmat.primitives.asymmetric import rsa
 from .cli_types import X509_GENERAL_NAME, X509Certificate, X509PrivateKey
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
