@@ -19,3 +19,5 @@ cert = "cert:cli.cli"
 
 [tool.setuptools]
 packages = ["cert"]
+
+[tool.pyright]
