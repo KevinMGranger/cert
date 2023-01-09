@@ -5,8 +5,8 @@ from cryptography import x509
 from pathlib import Path
 import typing
 import click
-from cert.cert.ser import serialize_private, serialize_public_cert
-from cert.cert import (
+from cert.certs.ser import serialize_private, serialize_public_cert
+from cert.certs import (
     make_private_key,
     simple_common_name,
     CertBuilderArgs,

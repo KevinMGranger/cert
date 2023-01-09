@@ -1,5 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
+from typing import NamedTuple
 import webbrowser
 from .utils import inherit_default
 from pathlib import Path
@@ -26,12 +27,31 @@ def make_context(bundle: Path, keyfile: Path) -> SSLContext:
     return ctx
 
 
+class Server(NamedTuple):
+    server: HTTPServer
+    thread: Thread
+
+    @property
+    def port(self):
+        return self.server.server_port
+
+    def url(self, host="127.0.0.1") -> str:
+        return f"https://{host}:{self.port}/"
+
+    def start(self):
+        self.thread.start()
+
+    def stop(self):
+        self.server.shutdown()
+        self.server.server_close()
+        self.thread.join()
+
+
 def serve(
     privkey: Path,
     cert: Path,
-    browser: bool = False,
     response_text: bytes = inherit_default(make_server, "response_text", bytes),
-) -> tuple[HTTPServer, Thread]:
+) -> Server:
     """
     Create and start an HTTP server, printing its information,
     and optionally opening a web browser to its page.
@@ -43,15 +63,5 @@ def serve(
     port = server.server_port
 
     thread = Thread(target=server.serve_forever)
-    thread.start()
 
-    ip_url = f"https://127.0.0.1:{port}/"
-
-    print(f"Serving on:")
-    print(ip_url)
-    print(f"https://localhost:{port}/")
-
-    if browser:
-        webbrowser.open(ip_url)
-
-    return server, thread
+    return Server(server, thread)

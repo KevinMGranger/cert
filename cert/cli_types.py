@@ -1,8 +1,7 @@
 from cryptography import x509
 import click
-from cert import cert
-from cert.util import parse_name as parse_x509_name
-from cert.ser import load_cert_private_key, InvalidPrivateKeyType
+from cert.certs.util import parse_name as parse_x509_name
+from cert.certs.ser import load_cert_private_key, InvalidPrivateKeyType
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
