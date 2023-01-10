@@ -1,7 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
 from typing import NamedTuple
-import webbrowser
 from .utils import inherit_default
 from pathlib import Path
 from ssl import SSLContext, PROTOCOL_TLS_SERVER
