@@ -146,10 +146,13 @@ def _extension_value(ext: x509.ExtensionType) -> str:
             return f"keyid:{_intersperse_colons(kid.hex().upper())}\n"
         case x509.SubjectAlternativeName():
             return ", ".join(_general_name(name) for name in ext)
+        case x509.BasicConstraints():
+            return "CA:TRUE" if ext.ca else ""
         case _:
-            raise NotImplementedError(
-                f"extension value for {ext.__class__.__name__} not yet implemented"
-            )
+            return f"extension value for {ext.__class__.__name__} not yet implemented"
+            # raise NotImplementedError(
+            #     f"extension value for {ext.__class__.__name__} not yet implemented"
+            # )
 
 
 def view(cert: x509.Certificate, file: TextIO = sys.stdout):
