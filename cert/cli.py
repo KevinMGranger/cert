@@ -31,6 +31,7 @@ def cli():
 @cli.command(help="make a private key")
 @click.argument("file", type=click.File(mode="xb", lazy=False))
 def mkpriv(file: typing.BinaryIO):
+    "Make a private key."
     key = make_private_key()
     bytes_ = serialize_private(key)
     file.write(bytes_)
@@ -53,6 +54,7 @@ def mkca(
     commonname: str,
     # expiration: datetime | None,
 ):
+    "Make a CA cert."
     # TODO: restrictions
     cn = simple_common_name(commonname)
     # TODO: this is wrong, and this is why we rely on typing
@@ -109,6 +111,7 @@ def mkcert(
     # expiration: datetime | None,
     sans: list[x509.GeneralName],
 ):
+    "Make a leaf cert."
     # TODO: restrictions
     cn = simple_common_name(commonname)
 
@@ -159,6 +162,7 @@ def serve(
     cert: str,
     browser: bool,
 ):
+    "Serve a test page over TLS using the given cert bundle."
     ctx = make_context(Path(cert), Path(privkey))
     server = make_server(ctx)
     port = server.server_port
