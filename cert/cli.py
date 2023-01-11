@@ -1,8 +1,8 @@
 import threading
-import typing
 import webbrowser
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import BinaryIO
 
 import click
 from cryptography import x509
@@ -12,6 +12,7 @@ from cryptography.hazmat.primitives.asymmetric.types import (
 
 from cert.certs import (
     CertBuilderArgs,
+    _openssl_view,
     make_private_key,
     sign_builder,
     simple_common_name,
@@ -28,16 +29,16 @@ def cli():
 
 
 # TODO: password option
-@cli.command(help="make a private key")
+@cli.command()
 @click.argument("file", type=click.File(mode="xb", lazy=False))
-def mkpriv(file: typing.BinaryIO):
+def mkpriv(file: BinaryIO):
     "Make a private key."
     key = make_private_key()
     bytes_ = serialize_private(key)
     file.write(bytes_)
 
 
-@cli.command(help="create a CA cert")
+@cli.command()
 @click.option("-p", "--privkey", required=True, type=X509PrivateKey())
 @click.option("-o", "--out", required=True, type=click.File("xb", lazy=False))
 @click.option(
@@ -50,11 +51,11 @@ def mkpriv(file: typing.BinaryIO):
 # @click.option("--exp", type=click.DateTime)
 def mkca(
     privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
-    out: typing.BinaryIO,
+    out: BinaryIO,
     commonname: str,
     # expiration: datetime | None,
 ):
-    "Make a CA cert."
+    "create a CA cert"
     # TODO: restrictions
     cn = simple_common_name(commonname)
     # TODO: this is wrong, and this is why we rely on typing
@@ -77,7 +78,7 @@ def mkca(
     out.write(serialize_public_cert(cacert))
 
 
-@cli.command(help="create a ca-signed leaf cert")
+@cli.command()
 @click.option(
     "-p",
     "--privkey",
@@ -106,12 +107,12 @@ def mkcert(
     privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
     cakey: CERTIFICATE_PRIVATE_KEY_TYPES,
     cacert: x509.Certificate,
-    out: typing.BinaryIO,
+    out: BinaryIO,
     commonname: str,
     # expiration: datetime | None,
     sans: list[x509.GeneralName],
 ):
-    "Make a leaf cert."
+    "create a ca-signed leaf cert"
     # TODO: restrictions
     cn = simple_common_name(commonname)
 
@@ -136,7 +137,7 @@ def mkcert(
     out.write(serialize_public_cert(leafcert))
 
 
-@cli.command(help="simple https server for testing cert")
+@cli.command()
 @click.option(
     "-p",
     "--privkey",
@@ -181,3 +182,10 @@ def serve(
             webbrowser.open(ip_url)
 
         thread.join()
+
+
+@cli.command()
+@click.argument("certs", type=X509Certificate(), required=True)
+def view(certs: x509.Certificate):
+    "View a cert a-la OpenSSL's -text output."
+    _openssl_view.view(certs)
