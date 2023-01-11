@@ -121,12 +121,19 @@ def _general_name(name: x509.GeneralName) -> str:
             raise NotImplementedError
 
 
+def _key_usages(ku: x509.KeyUsage) -> Iterable[str]:
+    for attr, name in _KEY_USAGE_MAPPING.items():
+        try:
+            if getattr(ku, attr):
+                yield name
+        except ValueError:
+            pass
+
+
 def _extension_value(ext: x509.ExtensionType) -> str:
     match ext:
         case x509.KeyUsage():
-            return ", ".join(
-                name for attr, name in _KEY_USAGE_MAPPING.items() if getattr(ext, attr)
-            )
+            return ", ".join(_key_usages(ext))
         case x509.ExtendedKeyUsage():
             # TODO: either map better names ourselves or contribute to cryptography
             return ", ".join(usage._name for usage in ext)
@@ -140,7 +147,9 @@ def _extension_value(ext: x509.ExtensionType) -> str:
         case x509.SubjectAlternativeName():
             return ", ".join(_general_name(name) for name in ext)
         case _:
-            raise NotImplementedError
+            raise NotImplementedError(
+                f"extension value for {ext.__class__.__name__} not yet implemented"
+            )
 
 
 def view(cert: x509.Certificate, file: TextIO = sys.stdout):
