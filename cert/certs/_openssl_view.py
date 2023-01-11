@@ -161,6 +161,7 @@ def view(cert: x509.Certificate, file: TextIO = sys.stdout):
         wrap(_intersperse_colons(cert.signature.hex()), width=54)
     )
 
+    # TODO: these won't necessarily all be v3, will they?
     extensions = "\n".join(
         f"""{(3*4*' ')}X509v3 {_extension_name(extension)}
 {(4*4*' ')}{_extension_value(extension.value)}"""
