@@ -1,22 +1,25 @@
-from datetime import datetime, timedelta
 import threading
-import webbrowser
-from cryptography import x509
-from pathlib import Path
 import typing
+import webbrowser
+from datetime import datetime, timedelta
+from pathlib import Path
+
 import click
-from cert.certs.ser import serialize_private, serialize_public_cert
-from cert.certs import (
-    make_private_key,
-    simple_common_name,
-    CertBuilderArgs,
-    sign_builder,
-)
-from cert.serve import make_server, make_context
-from .cli_types import X509_GENERAL_NAME, X509Certificate, X509PrivateKey
+from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
 )
+
+from cert.certs import (
+    CertBuilderArgs,
+    make_private_key,
+    sign_builder,
+    simple_common_name,
+)
+from cert.certs.ser import serialize_private, serialize_public_cert
+from cert.serve import make_context, make_server
+
+from .cli_types import X509_GENERAL_NAME, X509Certificate, X509PrivateKey
 
 
 @click.group()
@@ -162,7 +165,7 @@ def serve(
 
     ip_url = f"https://127.0.0.1:{port}/"
 
-    print(f"Serving on:")
+    print("Serving on:")
     print(ip_url)
     print(f"https://localhost:{port}/")
 

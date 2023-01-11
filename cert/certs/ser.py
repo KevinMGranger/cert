@@ -1,7 +1,6 @@
-from cryptography.hazmat.primitives import serialization
 from cryptography import x509
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.types import (
-    CERTIFICATE_PRIVATE_KEY_TYPES,
     CERTIFICATE_PRIVATE_KEY_TYPES,
 )
 from cryptography.hazmat.primitives.serialization import load_pem_private_key

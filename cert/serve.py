@@ -1,9 +1,10 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
+from ssl import PROTOCOL_TLS_SERVER, SSLContext
 from threading import Thread
 from typing import NamedTuple
-from .utils import inherit_default
-from pathlib import Path
-from ssl import SSLContext, PROTOCOL_TLS_SERVER
+
+from kmg.kitchen.python import inherit_default
 
 
 def make_server(
@@ -59,7 +60,6 @@ def serve(
     """
     ctx = make_context(Path(cert), Path(privkey))
     server = make_server(ctx, response_text=response_text)
-    port = server.server_port
 
     thread = Thread(target=server.serve_forever)
 

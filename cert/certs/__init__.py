@@ -1,18 +1,18 @@
-import attrs.converters
-from attrs.converters import default_if_none
-from typing import Callable, Iterable
-from attrs import frozen, field
-from cert.utils import attrs_type_passthrough
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography import x509
-from cryptography.x509.oid import NameOID
-from cryptography.hazmat.primitives import hashes
 from datetime import datetime, timedelta
+from typing import Callable
+
+import attrs.converters
+from attrs import field, frozen
+from attrs.converters import default_if_none
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.types import (
-    CERTIFICATE_PRIVATE_KEY_TYPES,
     CERTIFICATE_PRIVATE_KEY_TYPES,
     CERTIFICATE_PUBLIC_KEY_TYPES,
 )
+from cryptography.x509.oid import NameOID
+from kmg.kitchen.attrs import attrs_type_passthrough
 
 
 def make_private_key(
@@ -28,6 +28,10 @@ def make_private_key(
     return keygenfunc(public_exponent, key_size)
 
 
+def _thirty_days_from_now():
+    return datetime.now() + timedelta(days=30)
+
+
 # TODO: url constraints for CA, supporting cross-signing and whatnot
 @frozen(kw_only=True)
 class CertBuilderArgs:
@@ -39,7 +43,7 @@ class CertBuilderArgs:
     )
     not_valid_after: datetime = field(
         default=None,
-        converter=default_if_none(factory=lambda: datetime.now() + timedelta(days=30)),  # type: ignore
+        converter=default_if_none(factory=_thirty_days_from_now),  # type: ignore
     )
 
     subject_alternative_name: x509.SubjectAlternativeName | None = field(

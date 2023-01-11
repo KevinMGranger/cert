@@ -7,6 +7,7 @@ dependencies = [
     "cryptography",
     "attrs",
     "click",
+    "kitchen-snake @ https://github.com/KevinMGranger/kitchen-snake/archive/refs/tags/0.0.1.zip"
 ]
 
 [project.optional-dependencies]
@@ -19,5 +20,8 @@ cert = "cert:cli.cli"
 
 [tool.setuptools]
 packages = ["cert"]
+
+[tool.isort]
+profile = "black"
 
 [tool.pyright]

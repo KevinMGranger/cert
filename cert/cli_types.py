@@ -1,11 +1,11 @@
-from cryptography import x509
 import click
-from cert.certs.util import parse_name as parse_x509_name
-from cert.certs.ser import load_cert_private_key, InvalidPrivateKeyType
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
 )
+
+from cert.certs.ser import InvalidPrivateKeyType, load_cert_private_key
+from cert.certs.utils import parse_name as parse_x509_name
 
 
 class X509GeneralNameParamType(click.ParamType):
