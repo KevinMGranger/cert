@@ -7,10 +7,11 @@ dependencies = [
     "cryptography",
     "attrs",
     "click",
-    "kitchen-snake @ https://github.com/KevinMGranger/kitchen-snake/archive/refs/tags/0.0.1.zip"
+    "kitchen-snake @ git+https://github.com/KevinMGranger/kitchen-snake"
 ]
 
 [project.optional-dependencies]
+vault = ["hvac"]
 dev = [
     "ipython", "pytest", "black", "isort", "pylama"
 ]
