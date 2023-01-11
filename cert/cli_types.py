@@ -29,6 +29,17 @@ class X509Certificate(click.File):
         return x509.load_pem_x509_certificate(file.read())
 
 
+class X509Certificates(click.File):
+    name = "x509 Certificates"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, mode="rb", lazy=False)
+
+    def convert(self, value: str, param, ctx) -> list[x509.Certificate]:
+        file = super().convert(value, param, ctx)
+        return x509.load_pem_x509_certificates(file.read())
+
+
 class X509PrivateKey(click.File):
     name = "x509 Private Key"
 

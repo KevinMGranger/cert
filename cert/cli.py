@@ -20,7 +20,12 @@ from cert.certs import (
 from cert.certs.ser import serialize_private, serialize_public_cert
 from cert.serve import make_context, make_server
 
-from .cli_types import X509_GENERAL_NAME, X509Certificate, X509PrivateKey
+from .cli_types import (
+    X509_GENERAL_NAME,
+    X509Certificate,
+    X509Certificates,
+    X509PrivateKey,
+)
 
 
 @click.group()
@@ -185,7 +190,8 @@ def serve(
 
 
 @cli.command()
-@click.argument("certs", type=X509Certificate(), required=True)
-def view(certs: x509.Certificate):
+@click.argument("certs", type=X509Certificates(), required=True)
+def view(certs: list[x509.Certificate]):
     "View a cert a-la OpenSSL's -text output."
-    _openssl_view.view(certs)
+    for cert in certs:
+        _openssl_view.view(cert)
