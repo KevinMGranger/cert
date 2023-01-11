@@ -112,6 +112,15 @@ def _extension_name(ext: x509.Extension) -> str:
     return f"{name}: {criticality}"
 
 
+def _general_name(name: x509.GeneralName) -> str:
+    # TODO: the rest
+    match name:
+        case x509.DNSName():
+            return f"DNS:{name.value}"
+        case _:
+            raise NotImplementedError
+
+
 def _extension_value(ext: x509.ExtensionType) -> str:
     match ext:
         case x509.KeyUsage():
@@ -121,6 +130,15 @@ def _extension_value(ext: x509.ExtensionType) -> str:
         case x509.ExtendedKeyUsage():
             # TODO: either map better names ourselves or contribute to cryptography
             return ", ".join(usage._name for usage in ext)
+        case x509.SubjectKeyIdentifier():
+            return _intersperse_colons(ext.digest.hex().upper())
+        case x509.AuthorityKeyIdentifier():
+            kid = ext.key_identifier
+            assert kid is not None  # todo: what does this mean?
+            # TODO: unclear if this blank line is because of AKI or because of SAN
+            return f"keyid:{_intersperse_colons(kid.hex().upper())}\n"
+        case x509.SubjectAlternativeName():
+            return ", ".join(_general_name(name) for name in ext)
         case _:
             raise NotImplementedError
 
@@ -146,7 +164,7 @@ def view(cert: x509.Certificate, file: TextIO = sys.stdout):
     extensions = "\n".join(
         f"""{(3*4*' ')}X509v3 {_extension_name(extension)}
 {(4*4*' ')}{_extension_value(extension.value)}"""
-        for extension in cert.extensions[0:2]
+        for extension in cert.extensions
     )
 
     templated = cleandoc(
@@ -167,13 +185,6 @@ Certificate:
                 {PubKeyRepr(pubkey)}
         X509v3 extensions:
 {extensions}
-            X509v3 Subject Key Identifier: 
-                1C:1F:60:A6:4C:0D:17:10:E4:19:51:5D:17:7E:11:13:1A:52:4A:7F
-            X509v3 Authority Key Identifier: 
-                keyid:61:D9:BD:D4:FB:86:5B:96:80:AE:E9:43:63:63:B3:9E:EC:00:EA:18
-
-            X509v3 Subject Alternative Name: 
-                DNS:test.i.kmg.fyi
     Signature Algorithm: {cert.signature_algorithm_oid._name}
          {signature}
 {cert.public_bytes(Encoding.PEM).decode("ascii")}"""
