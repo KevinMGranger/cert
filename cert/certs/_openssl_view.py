@@ -148,8 +148,10 @@ def _extension_value(ext: x509.ExtensionType) -> str:
             return ", ".join(_general_name(name) for name in ext)
         case x509.BasicConstraints():
             return "CA:TRUE" if ext.ca else ""
+        # case x509.AuthorityInformationAccess():
+        #     return 
         case _:
-            return f"extension value for {ext.__class__.__name__} not yet implemented"
+            return f"extension value for {ext.__class__.__name__} not yet implemented but it looks like this: {ext}"
             # raise NotImplementedError(
             #     f"extension value for {ext.__class__.__name__} not yet implemented"
             # )

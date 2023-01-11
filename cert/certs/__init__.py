@@ -12,7 +12,7 @@ from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PUBLIC_KEY_TYPES,
 )
 from cryptography.x509.oid import NameOID
-from kmg.kitchen.attrs import attrs_type_passthrough
+from kmg.kitchen.attrs import type_passthrough
 
 
 def make_private_key(
@@ -49,7 +49,7 @@ class CertBuilderArgs:
     subject_alternative_name: x509.SubjectAlternativeName | None = field(
         default=None,
         converter=attrs.converters.optional(
-            attrs_type_passthrough(
+            type_passthrough(
                 x509.SubjectAlternativeName, x509.SubjectAlternativeName
             )
         ),
