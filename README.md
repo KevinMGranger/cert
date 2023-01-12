@@ -34,6 +34,9 @@ _plugins / domains_ like vault make more sense as a sub-subcommand.
 - TODO: is cross-signing a different thing entirely?
 - hmm, is the fact that you can "sign" a cert builder already a shortcut, instead of a CSR being created?
 
+- test-trust
+- import
+
 # vault support
 
 - do we make this limited? we don't set up anything for you, just let you integrate?
