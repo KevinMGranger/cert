@@ -16,11 +16,11 @@ from kmg.kitchen.datetime import must_be_positive_timedelta, must_be_tz_aware
 # `Extension`s are those instances with the added context of criticality.
 
 
-def ext_type_to_ext(ext: x509.ExtensionType, critical: bool) -> x509.Extension:
+def wrapext(ext: x509.ExtensionType, critical: bool) -> x509.Extension:
     return x509.Extension(ext.oid, critical, ext)
 
 
-def ext_to_ext_type(ext: x509.Extension) -> tuple[x509.ExtensionType, bool]:
+def unwrapext(ext: x509.Extension) -> tuple[x509.ExtensionType, bool]:
     return ext.value, ext.critical
 
 
