@@ -35,6 +35,7 @@ def _thirty_days_from_now():
 # TODO: url constraints for CA, supporting cross-signing and whatnot
 @frozen(kw_only=True)
 class CertBuilderArgs:
+    "Standard arguments for a certificate builder."
     subject: x509.Name
     issuer: x509.Name
     public_key: CERTIFICATE_PUBLIC_KEY_TYPES
@@ -87,6 +88,7 @@ def sign_builder(
     return builder.sign(private_key, algorithm)
 
 
+# TODO: is this necessary for the browser?
 ORG = x509.NameAttribute(NameOID.ORGANIZATION_NAME, "cert python cli")
 
 

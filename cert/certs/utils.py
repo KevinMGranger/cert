@@ -17,10 +17,12 @@ from kmg.kitchen.datetime import must_be_positive_timedelta, must_be_tz_aware
 
 
 def wrapext(ext: x509.ExtensionType, critical: bool) -> x509.Extension:
+    "Wrap the extension with its criticality context."
     return x509.Extension(ext.oid, critical, ext)
 
 
 def unwrapext(ext: x509.Extension) -> tuple[x509.ExtensionType, bool]:
+    "Get the extension's value and its criticality."
     return ext.value, ext.critical
 
 

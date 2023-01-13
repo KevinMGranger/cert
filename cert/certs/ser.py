@@ -15,7 +15,8 @@ def serialize_private(
     privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
     *,
     encryption_algorithm: serialization.KeySerializationEncryption = serialization.NoEncryption(),
-):
+) -> bytes:
+    "Serialize a private key."
     return privkey.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.TraditionalOpenSSL,
@@ -33,6 +34,8 @@ class InvalidPrivateKeyType(ValueError):
 
 
 def serialize_public_cert(cert: x509.Certificate):
+    "Serialize a public key in PEM format."
+    # TODO: function not really necessary
     return cert.public_bytes(serialization.Encoding.PEM)
 
 
