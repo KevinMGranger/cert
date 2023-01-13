@@ -1,6 +1,8 @@
 - [ ] vault integration
 
 - [ ] for "serve" testing: does using an HTTP proxy offload the DNS? so we could use it to fake it?
+- [ ] can we take a signal / input to refresh when the certificate changes? Polling would have to be over HTTP to not disturb things.
+  - I'm doing too much, aren't I
 
 - [ ] commands for importing into various trusts (system (win/mac/linux) / firefox / idk what else)
 
