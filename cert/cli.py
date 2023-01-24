@@ -67,6 +67,32 @@ nameConstraints=critical,permitted;DNS:{constraint}
 
 
 @cli.command()
+@click.option(
+    "--cakey",
+    required=True,
+    type=X509PrivateKey(),
+    help="The CA cert private key",
+)
+@click.option("--cacert", required=True, type=X509Certificate(), help="The CA cert")
+@click.option(
+    "--target", required=True, type=X509Certificate(), help="the target CA to constrain"
+)
+@click.option("-o", "--out", required=True, type=click.File("xb", lazy=False))
+@click.argument("constraint", required=True)
+def try_xsign(
+    cakey: CERTIFICATE_PRIVATE_KEY_TYPES,
+    cacert: x509.Certificate,
+    target: x509.Certificate,
+    constraint: str,
+    out: BinaryIO,
+):
+    ba = CertBuilderArgs.cross_sign_with_constraint(target, cacert.subject, constraint)
+    builder = ba.make_builder()
+    signed = sign_builder(builder, cakey)
+    out.write(serialize_public_cert(signed))
+
+
+@cli.command()
 @click.option("--cakey", required=True)
 @click.option("--cacert", required=True)
 @click.option("--target", required=True)
@@ -85,6 +111,7 @@ def xsign(
         config_path = f"{d}/constraint.cfg"
         print("writing following config to", d)
         # todo: ask for name?
+        # todo: does the subject name need to be the same?
         config = request_config(f"constraint to {constraint}", constraint)
         print(config)
         with open(config_path, "x") as f:
@@ -108,6 +135,7 @@ def xsign(
         ]
         print(shlex.join(cmd))
         result = subprocess.run(cmd, check=True)
+
 
 # TODO: password option
 @cli.command()
@@ -144,7 +172,7 @@ def mkca(
 
     # TODO: was 2 to account for roots. should be configurable.
     # wait should it have been 1 the whole time? does "0" mean one more?
-    constraint_ext = x509.BasicConstraints(True, 1) 
+    constraint_ext = x509.BasicConstraints(True, 1)
     # TODO: figure out what these are and what chrome/macos needs
     key_usage = x509.KeyUsage(True, True, True, True, True, True, True, False, False)
 

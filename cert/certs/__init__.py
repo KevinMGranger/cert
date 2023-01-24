@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Callable
+from typing import Callable, Self
 
 import attrs.converters
 from attrs import field, frozen
@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives.asymmetric.types import (
     CERTIFICATE_PRIVATE_KEY_TYPES,
     CERTIFICATE_PUBLIC_KEY_TYPES,
 )
+from .utils import wrapext
 from cryptography.x509.oid import NameOID
 from kmg.kitchen.attrs import type_passthrough
 
@@ -50,14 +51,31 @@ class CertBuilderArgs:
     subject_alternative_name: x509.SubjectAlternativeName | None = field(
         default=None,
         converter=attrs.converters.optional(
-            type_passthrough(
-                x509.SubjectAlternativeName, x509.SubjectAlternativeName
-            )
+            type_passthrough(x509.SubjectAlternativeName, x509.SubjectAlternativeName)
         ),
     )
     extensions: tuple[x509.Extension, ...] = field(default=tuple(), converter=tuple)
 
     serial_number: int = field(factory=x509.random_serial_number)
+
+    @classmethod
+    def cross_sign_with_constraint(
+        cls, other: x509.Certificate, issuer: x509.Name, constraint: str
+    ) -> Self:
+        constraint_ext = wrapext(
+            x509.NameConstraints([x509.DNSName(constraint)], None), True
+        )
+
+        all_extensions = (*other.extensions, constraint_ext)
+
+        return cls(
+            subject=other.subject,
+            issuer=issuer,
+            public_key=other.public_key(),
+            not_valid_before=other.not_valid_before,
+            not_valid_after=other.not_valid_after,
+            extensions=all_extensions,
+        )
 
     def make_builder(self) -> x509.CertificateBuilder:
         builder = (
