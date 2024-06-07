@@ -2,8 +2,6 @@
 (De)serialization tools.
 """
 
-from typing import TextIO
-
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.types import (

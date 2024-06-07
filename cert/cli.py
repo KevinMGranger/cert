@@ -134,7 +134,8 @@ def xsign(
             out,
         ]
         print(shlex.join(cmd))
-        result = subprocess.run(cmd, check=True)
+        # TODO
+        _result = subprocess.run(cmd, check=True)
 
 
 # TODO: password option
