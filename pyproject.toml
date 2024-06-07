@@ -12,17 +12,12 @@ dependencies = [
 
 [project.optional-dependencies]
 vault = ["hvac"]
-dev = [
-    "ipython", "pytest", "black", "isort", "pylama"
-]
+dev = ["pytest", "ruff"]
 
 [project.scripts]
 cert = "cert:cli.cli"
 
 [tool.setuptools]
 packages = ["cert"]
-
-[tool.isort]
-profile = "black"
 
 [tool.pyright]

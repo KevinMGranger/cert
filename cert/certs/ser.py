@@ -1,6 +1,7 @@
 """
 (De)serialization tools.
 """
+
 from typing import TextIO
 
 from cryptography import x509
