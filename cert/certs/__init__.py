@@ -8,8 +8,8 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.types import (
-    CERTIFICATE_PRIVATE_KEY_TYPES,
-    CERTIFICATE_PUBLIC_KEY_TYPES,
+    CertificateIssuerPrivateKeyTypes,
+    CertificateIssuerPublicKeyTypes,
 )
 from .utils import wrapext
 from cryptography.x509.oid import NameOID
@@ -19,7 +19,7 @@ from kmg.kitchen.attrs import type_passthrough
 def make_private_key(
     # todo: callable protocol for positional and kwargs, although is that really necessary?
     keygenfunc: Callable[
-        [int, int], CERTIFICATE_PRIVATE_KEY_TYPES
+        [int, int], CertificateIssuerPrivateKeyTypes
     ] = rsa.generate_private_key,
     /,
     *,
@@ -40,7 +40,7 @@ class CertBuilderArgs:
 
     subject: x509.Name
     issuer: x509.Name
-    public_key: CERTIFICATE_PUBLIC_KEY_TYPES
+    public_key: CertificateIssuerPublicKeyTypes
     not_valid_before: datetime = field(
         default=None,
         converter=default_if_none(factory=datetime.now),  # type: ignore
@@ -102,7 +102,7 @@ class CertBuilderArgs:
 
 def sign_builder(
     builder: x509.CertificateBuilder,
-    private_key: CERTIFICATE_PRIVATE_KEY_TYPES,
+    private_key: CertificateIssuerPrivateKeyTypes,
     algorithm: hashes.HashAlgorithm = hashes.SHA256(),
 ):
     return builder.sign(private_key, algorithm)

@@ -10,7 +10,7 @@ from typing import BinaryIO
 import click
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric.types import (
-    CERTIFICATE_PRIVATE_KEY_TYPES,
+    CertificateIssuerPrivateKeyTypes,
 )
 
 from cert.certs import (
@@ -42,7 +42,7 @@ def cli():
 # @click.option("--cacert", required=True, type=X509Certificate())
 # @click.option("--")
 # def xsign(
-#     cakey: CERTIFICATE_PRIVATE_KEY_TYPES,
+#     cakey: CertificateIssuerPrivateKeyTypes,
 #     cacert: x509.Certificate,
 #     target_cert: x509.Certificate
 #     constraint: str,
@@ -80,7 +80,7 @@ nameConstraints=critical,permitted;DNS:{constraint}
 @click.option("-o", "--out", required=True, type=click.File("xb", lazy=False))
 @click.argument("constraint", required=True)
 def try_xsign(
-    cakey: CERTIFICATE_PRIVATE_KEY_TYPES,
+    cakey: CertificateIssuerPrivateKeyTypes,
     cacert: x509.Certificate,
     target: x509.Certificate,
     constraint: str,
@@ -159,7 +159,7 @@ def mkpriv(file: BinaryIO):
 )
 # @click.option("--exp", type=click.DateTime)
 def mkca(
-    privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
+    privkey: CertificateIssuerPrivateKeyTypes,
     out: BinaryIO,
     commonname: str,
     # expiration: datetime | None,
@@ -215,8 +215,8 @@ def mkca(
 # @click.option("--exp", type=click.DateTime)
 @click.argument("sans", required=True, nargs=-1, type=X509_GENERAL_NAME)
 def mkcert(
-    privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
-    cakey: CERTIFICATE_PRIVATE_KEY_TYPES,
+    privkey: CertificateIssuerPrivateKeyTypes,
+    cakey: CertificateIssuerPrivateKeyTypes,
     cacert: x509.Certificate,
     out: BinaryIO,
     commonname: str,

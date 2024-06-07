@@ -7,7 +7,9 @@ from typing import Iterable, NamedTuple, TextIO
 
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.asymmetric.types import CERTIFICATE_PUBLIC_KEY_TYPES
+from cryptography.hazmat.primitives.asymmetric.types import (
+    CertificateIssuerPublicKeyTypes,
+)
 from cryptography.hazmat.primitives.serialization import Encoding
 
 
@@ -26,7 +28,7 @@ def _format_datetime(d: datetime) -> str:
     return f"{month} {day} {rest}"
 
 
-def _pubkey_alg_name(pk: CERTIFICATE_PUBLIC_KEY_TYPES) -> str:
+def _pubkey_alg_name(pk: CertificateIssuerPublicKeyTypes) -> str:
     # TODO: the rest, I guess.
     # I can script creating these and asking openssl to say it
     match pk:

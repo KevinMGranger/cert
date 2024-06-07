@@ -1,7 +1,7 @@
 import click
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric.types import (
-    CERTIFICATE_PRIVATE_KEY_TYPES,
+    CertificateIssuerPrivateKeyTypes,
 )
 
 from cert.certs.ser import InvalidPrivateKeyType, load_cert_private_key
@@ -46,7 +46,7 @@ class X509PrivateKey(click.File):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, mode="rb", lazy=False)
 
-    def convert(self, value: str, param, ctx) -> CERTIFICATE_PRIVATE_KEY_TYPES:
+    def convert(self, value: str, param, ctx) -> CertificateIssuerPrivateKeyTypes:
         file = super().convert(value, param, ctx)
         try:
             return load_cert_private_key(file.read())

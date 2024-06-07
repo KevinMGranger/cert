@@ -7,13 +7,13 @@ from typing import TextIO
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.types import (
-    CERTIFICATE_PRIVATE_KEY_TYPES,
+    CertificateIssuerPrivateKeyTypes,
 )
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 
 def serialize_private(
-    privkey: CERTIFICATE_PRIVATE_KEY_TYPES,
+    privkey: CertificateIssuerPrivateKeyTypes,
     *,
     encryption_algorithm: serialization.KeySerializationEncryption = serialization.NoEncryption(),
 ) -> bytes:
@@ -40,9 +40,9 @@ def serialize_public_cert(cert: x509.Certificate):
     return cert.public_bytes(serialization.Encoding.PEM)
 
 
-def load_cert_private_key(data: bytes) -> CERTIFICATE_PRIVATE_KEY_TYPES:
+def load_cert_private_key(data: bytes) -> CertificateIssuerPrivateKeyTypes:
     privkey = load_pem_private_key(data, password=None)
-    if not isinstance(privkey, CERTIFICATE_PRIVATE_KEY_TYPES):
+    if not isinstance(privkey, CertificateIssuerPrivateKeyTypes):
         # todo: this started working?  # type: ignore # works in 3.10, why does it complain?
         raise InvalidPrivateKeyType(type(privkey).__name__)
     else:
