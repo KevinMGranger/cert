@@ -26,3 +26,5 @@
 - [ ] trust tests based on badssl.com
   - [ ] do they do name constraints?
   - [ ] is it even maintained? no-common-name is expired instead of just missing it
+
+- [ ] SSH certs!
