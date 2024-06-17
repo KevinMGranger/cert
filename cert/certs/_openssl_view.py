@@ -1,3 +1,4 @@
+from functools import partial
 import sys
 import re
 from datetime import datetime
@@ -18,12 +19,12 @@ def _format_datetime(d: datetime) -> str:
     There's some complexities with padding here, unfortunately.
     That's why we can't just do a single strftime.
     """
+
+    d = d.astimezone()
     month = d.strftime("%b")
     day = f"{d.day:2}"
 
-    # WARNING: assuming naive but UTC, since that's what cryptography gives us.
-    # otherwise, a naive datetime will be assumed to be localtime, if you use `.astimezone`!
-    rest = d.strftime("%H:%M:%S %Y GMT")
+    rest = d.strftime("%H:%M:%S %Y %Z")
 
     return f"{month} {day} {rest}"
 
@@ -51,19 +52,23 @@ def _pubkey_alg_name(pk: CertificateIssuerPublicKeyTypes) -> str:
 # def _pubkey_bitsize()
 
 
-def _intersperse_colons(s: str) -> str:
-    return ":".join(wrap(s, width=2))
 
 
 _MOD_WIDTH = 45
 
 
+# TODO: unified indentation strategy,
+# verbosity
 class PubKeyRepr(NamedTuple):
     key: rsa.RSAPublicKey  # TODO: support for other key types
 
     @property
     def nums(self):
         return self.key.public_numbers()
+
+    @property
+    def short(self):
+        return f"Public-Key: ({self.key.key_size} bit)"
 
     def _lines(self) -> Iterable[str]:
         yield f"Public-Key: ({self.key.key_size} bit)"
@@ -87,31 +92,6 @@ class PubKeyRepr(NamedTuple):
         return ("\n" + line_indentation).join(self._lines())
 
 
-def _break_pascal_case_name(s: str) -> list[str]:
-    return re.findall(r"[A-Z][a-z]+", s)
-
-
-_KEY_USAGE_ATTR_NAMES = (
-    "digital_signature",
-    "content_commitment",
-    "key_encipherment",
-    "data_encipherment",
-    "key_agreement",
-    "key_cert_sign",
-    "crl_sign",
-    "encipher_only",
-    "decipher_only",
-)
-
-_KEY_USAGE_MAPPING = {
-    attr: attr.replace("_", " ").title() for attr in _KEY_USAGE_ATTR_NAMES
-}
-
-
-def _extension_name(ext: x509.Extension) -> str:
-    name = " ".join(_break_pascal_case_name(type(ext.value).__name__))
-    criticality = "critical" if ext.critical else ""
-    return f"{name}: {criticality}"
 
 
 def _general_name(name: x509.GeneralName) -> str:
@@ -119,17 +99,12 @@ def _general_name(name: x509.GeneralName) -> str:
     match name:
         case x509.DNSName():
             return f"DNS:{name.value}"
+        case x509.IPAddress():
+            return f"IP Address:{name.value}"
         case _:
-            raise NotImplementedError
+            raise NotImplementedError(f"No support for {name}")
 
 
-def _key_usages(ku: x509.KeyUsage) -> Iterable[str]:
-    for attr, name in _KEY_USAGE_MAPPING.items():
-        try:
-            if getattr(ku, attr):
-                yield name
-        except ValueError:
-            pass
 
 
 def _extension_value(ext: x509.ExtensionType) -> str:
@@ -152,6 +127,13 @@ def _extension_value(ext: x509.ExtensionType) -> str:
             return "CA:TRUE" if ext.ca else ""
         # case x509.AuthorityInformationAccess():
         #     return
+        case x509.NameConstraints():
+            s = []
+            if ext.permitted_subtrees:
+                s.append(', '.join(_general_name(x) for x in ext.permitted_subtrees))
+            if ext.excluded_subtrees:
+                s.append(', '.join(_general_name(x) for x in ext.excluded_subtrees))
+            return "\n".join(s)
         case _:
             return f"extension value for {ext.__class__.__name__} not yet implemented but it looks like this: {ext}"
             # raise NotImplementedError(
@@ -163,6 +145,9 @@ def view(cert: x509.Certificate, file: TextIO = sys.stdout):
     """
     View the certificate in a similar manner to openssl's `-text` output.
     """
+
+    p = partial(print, file=file)
+
     # TODO: file issue about sig alg name being sunder
     version = cert.version.value
     version_human = version + 1
@@ -194,17 +179,18 @@ Certificate:
     Signature Algorithm: {cert.signature_algorithm_oid._name}
         Issuer: {cert.issuer.rfc4514_string()}
         Validity
-            Not Before: {_format_datetime(cert.not_valid_before)}
-            Not After : {_format_datetime(cert.not_valid_after)}
+            Not Before: {_format_datetime(cert.not_valid_before_utc)}
+            Not After : {_format_datetime(cert.not_valid_after_utc)}
         Subject: {cert.subject.rfc4514_string()}
         Subject Public Key Info:
             Public Key Algorithm: {_pubkey_alg_name(pubkey)}
-                {PubKeyRepr(pubkey)}
+                {PubKeyRepr(pubkey).short}
         X509v3 extensions:
 {extensions}
     Signature Algorithm: {cert.signature_algorithm_oid._name}
-         {signature}
-{cert.public_bytes(Encoding.PEM).decode("ascii")}"""
+"""
+        #  {signature}
+        # {cert.public_bytes(Encoding.PEM).decode("ascii")}"""
     )
 
     print(templated, file=file)

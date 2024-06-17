@@ -1,3 +1,4 @@
+import sys
 import threading
 import shlex
 import subprocess
@@ -12,13 +13,14 @@ from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric.types import (
     CertificateIssuerPrivateKeyTypes,
 )
+import yaml
 
 from cert.certs import (
     CertBuilderArgs,
-    _openssl_view,
     make_private_key,
     sign_builder,
     simple_common_name,
+    view as yaml_view,
 )
 from cert.certs.ser import serialize_private, serialize_public_cert
 from cert.serve import make_context, make_server
@@ -30,8 +32,10 @@ from .cli_types import (
     X509PrivateKey,
 )
 
+CLICK_CTX_SETTINGS = dict(help_option_names="-h --help -?".split())
 
-@click.group()
+
+@click.group(context_settings=CLICK_CTX_SETTINGS)
 def cli():
     pass
 
@@ -297,8 +301,24 @@ def serve(
 
 
 @cli.command()
-@click.argument("certs", type=X509Certificates(), required=True)
-def view(certs: list[x509.Certificate]):
-    "View a cert a-la OpenSSL's -text output."
-    for cert in certs:
-        _openssl_view.view(cert)
+@click.argument("cert_files", type=X509Certificates(), required=True, nargs=-1)
+def view(cert_files: tuple[list[x509.Certificate]]):
+    "View cert(s) in a readable yaml format."
+    # "View a cert a-la OpenSSL's -text output."
+    if len(cert_files) == 1:
+        certs = cert_files[0]
+        yaml.dump_all(
+            (yaml_view.destructure(cert) for cert in certs),
+            sys.stdout,
+            sort_keys=False,
+            explicit_start=len(certs) != 1,
+            explicit_end=len(certs) == 0,
+        )
+    else:
+        yaml.dump_all(
+            ([yaml_view.destructure(cert) for cert in certs] for certs in cert_files),
+            sys.stdout,
+            sort_keys=False,
+            explicit_start=True,
+            explicit_end=False,
+        )
