@@ -5,10 +5,12 @@ including Openssl-like, friendly, json and yaml formats.
 
 from __future__ import annotations
 import re
+import sys
 from textwrap import wrap
 import yaml
 from cryptography import x509
-from typing import Iterable, NamedTuple
+from typing import Iterable, NamedTuple, ParamSpec, TextIO
+from contextvars import ContextVar
 
 _KEY_USAGE_ATTR_NAMES = (
     "digital_signature",
@@ -53,6 +55,15 @@ def _general_name(name: x509.GeneralName) -> str:
         case _:
             raise NotImplementedError(f"No support for {name}")
 
+out: ContextVar[TextIO] = ContextVar("out", default=sys.stdout)
+indentation = ContextVar("indentation", default=0)
+
+def p(*values, indent: int|None = None, **kwargs: ParamSpec[print]):
+    indent = indent if indent is not None else indentation.get()
+    print(" " * indent, *values, file=out.get(), **kwargs)
+
+# def pstr(value: str, indent: int|None = None):
+#     if "\n" in 
 
 class ExtensionType(NamedTuple):
     critical: bool

@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import TypeVar, Generic
+
 import click
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric.types import (
@@ -6,6 +9,23 @@ from cryptography.hazmat.primitives.asymmetric.types import (
 
 from cert.certs.ser import InvalidPrivateKeyType, load_cert_private_key
 from cert.certs.utils import parse_name as parse_x509_name
+
+T = TypeVar("T", bound=click.ParamType)
+
+class WithPath(Generic[T]):
+    def __init__(self, path: Path | str, value: T):
+        self.path = Path(path)
+        self.value = value
+
+class ParamWithPath(Generic[T], click.ParamType):
+    def __init__(self, wrapped: T, *args, **kwargs):
+        self.name = wrapped.name
+        self.wrapped = wrapped
+        super().__init__(*args, **kwargs, mode="rb", lazy=False)
+
+    def convert(self, value: str, param, ctx) -> WithPath[T]:
+        converted = self.wrapped.convert(value, param, ctx)
+        return WithPath(value, converted)
 
 
 class X509GeneralNameParamType(click.ParamType):
