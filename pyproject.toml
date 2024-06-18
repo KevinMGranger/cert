@@ -7,6 +7,7 @@ dependencies = [
     "cryptography",
     "attrs",
     "click",
+    "pyyaml",
     "kitchen-snake @ git+https://github.com/KevinMGranger/kitchen-snake"
 ]
 
