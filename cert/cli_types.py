@@ -12,10 +12,12 @@ from cert.certs.utils import parse_name as parse_x509_name
 
 T = TypeVar("T", bound=click.ParamType)
 
+
 class WithPath(Generic[T]):
     def __init__(self, path: Path | str, value: T):
         self.path = Path(path)
         self.value = value
+
 
 class ParamWithPath(Generic[T], click.ParamType):
     def __init__(self, wrapped: T, *args, **kwargs):
@@ -33,6 +35,13 @@ class X509GeneralNameParamType(click.ParamType):
 
     def convert(self, value: str, param, ctx):
         return parse_x509_name(value)
+
+
+class X509Name(click.ParamType):
+    name = "x509 Name"
+
+    def convert(self, value: str, param, ctx):
+        return x509.Name.from_rfc4514_string(value)
 
 
 X509_GENERAL_NAME = X509GeneralNameParamType()

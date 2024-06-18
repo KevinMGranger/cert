@@ -29,6 +29,7 @@ from .cli_types import (
     X509_GENERAL_NAME,
     X509Certificate,
     X509Certificates,
+    X509Name,
     X509PrivateKey,
 )
 
@@ -155,23 +156,21 @@ def mkpriv(file: BinaryIO):
 @cli.command()
 @click.option("-p", "--privkey", required=True, type=X509PrivateKey())
 @click.option("-o", "--out", required=True, type=click.File("xb", lazy=False))
-@click.option(
-    "--commonname",
-    "--name",
+@click.argument(
+    "name",
     required=True,
-    type=str,
-    default=datetime.now() + timedelta(days=40),
+    type=X509Name(),
+    # I assume I mixed it up with the expiration field
+    # default=datetime.now() + timedelta(days=40),
 )
 # @click.option("--exp", type=click.DateTime)
 def mkca(
     privkey: CertificateIssuerPrivateKeyTypes,
     out: BinaryIO,
-    commonname: str,
+    name: x509.Name,
     # expiration: datetime | None,
 ):
     "create a CA cert"
-    # TODO: restrictions
-    cn = simple_common_name(commonname)
     # TODO: this is wrong, and this is why we rely on typing
     pubkey = privkey.public_key()
 
@@ -182,8 +181,8 @@ def mkca(
     key_usage = x509.KeyUsage(True, True, True, True, True, True, True, False, False)
 
     builder = CertBuilderArgs(
-        subject=cn,
-        issuer=cn,
+        subject=name,
+        issuer=name,
         public_key=pubkey,
         extensions=(
             x509.Extension(constraint_ext.oid, True, constraint_ext),
